@@ -285,4 +285,14 @@ if __name__ == '__main__':
     
     print("Starting Keno Prediction API...")
     print("Access the UI at: http://localhost:5000")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    print("⚠️  For production deployment, use a production WSGI server (e.g., gunicorn)")
+    
+    # Security: Only bind to localhost by default
+    # Set FLASK_HOST environment variable to '0.0.0.0' to allow external access
+    host = os.getenv('FLASK_HOST', '127.0.0.1')
+    debug_mode = os.getenv('FLASK_DEBUG', 'False').lower() in ('true', '1', 'yes')
+    
+    if host == '0.0.0.0':
+        print("⚠️  WARNING: Server is accessible from external networks!")
+    
+    app.run(debug=debug_mode, host=host, port=5000)

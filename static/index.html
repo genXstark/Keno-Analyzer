@@ -394,19 +394,9 @@
             let html = '<div class="predictions-display">';
             html += '<h3>Predicted Numbers:</h3>';
             html += '<div class="number-grid">';
-            
-            data.numbers.forEach((num, index) => {
-                setTimeout(() => {
-                    const ball = document.createElement('div');
-                    ball.className = 'number-ball';
-                    ball.textContent = num;
-                    ball.style.animationDelay = `${index * 0.1}s`;
-                    document.querySelector('.number-grid').appendChild(ball);
-                }, index * 100);
-            });
-            
             html += '</div>';
             
+            // Insert structure first
             html += `<div class="confidence-bar">
                 <div class="confidence-fill" style="width: ${data.confidence}%">
                     ${data.confidence}% Confidence
@@ -422,6 +412,20 @@
             html += '</div>';
             
             resultDiv.innerHTML = html;
+            
+            // Now animate numbers into the grid
+            const numberGrid = resultDiv.querySelector('.number-grid');
+            if (numberGrid) {
+                data.numbers.forEach((num, index) => {
+                    setTimeout(() => {
+                        const ball = document.createElement('div');
+                        ball.className = 'number-ball';
+                        ball.textContent = num;
+                        ball.style.animationDelay = `${index * 0.1}s`;
+                        numberGrid.appendChild(ball);
+                    }, index * 100);
+                });
+            }
         }
 
         async function loadStatistics() {

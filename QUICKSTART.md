@@ -15,13 +15,29 @@ pip install tensorflow
 
 ### Step 2: Run the Application
 
+**For Local Development:**
 ```bash
 python api.py
+```
+
+**For Development with External Access:**
+```bash
+# ⚠️ WARNING: Only use this on trusted networks!
+FLASK_HOST=0.0.0.0 python api.py
+```
+
+**For Production:**
+```bash
+# Use a production WSGI server instead of Flask's dev server
+pip install gunicorn
+gunicorn -w 4 -b 127.0.0.1:5000 api:app
 ```
 
 ### Step 3: Open in Browser
 
 Navigate to: **http://localhost:5000**
+
+**Security Note**: By default, the server only binds to localhost (127.0.0.1) for security. To allow external access, set the `FLASK_HOST` environment variable, but only on trusted networks.
 
 ---
 

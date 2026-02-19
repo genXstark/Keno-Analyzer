@@ -95,8 +95,8 @@ class DQNKenoPredictor:
         if TENSORFLOW_AVAILABLE and self.model is not None:
             try:
                 self.model.load_weights(name)
-            except:
-                print(f"Could not load weights from {name}")
+            except (IOError, OSError, Exception) as e:
+                print(f"Could not load weights from {name}: {e}")
     
     def save(self, name):
         """Save model weights"""
