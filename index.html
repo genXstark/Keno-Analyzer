@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keno Analyzer - Client-Side Version</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .disclaimer {
+            background: rgba(255, 255, 255, 0.15);
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin: 20px 0;
+            color: white;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: 600;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .predictions-display {
+            margin-top: 20px;
+        }
+
+        .number-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .number-ball {
+            aspect-ratio: 1;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            animation: popIn 0.5s ease-out;
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .confidence-bar {
+            background: #e0e0e0;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 15px;
+            position: relative;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4caf50, #8bc34a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            transition: width 1s ease-out;
+        }
+
+        .strategy-info {
+            background: #f0f4ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-section {
+            margin-top: 20px;
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .info-section h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .info-section ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        .info-section li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎰 Keno Analyzer Pro</h1>
+            <p class="subtitle">Statistical Analysis & Educational Tool</p>
+        </header>
+
+        <div class="disclaimer">
+            <strong>⚠️ Important Disclaimer:</strong> This tool is for educational and entertainment purposes only. 
+            Keno is a game of chance with outcomes determined by random number generation. No prediction system 
+            can guarantee winning results. This tool demonstrates various statistical analysis techniques.
+            Please gamble responsibly and within your means.
+        </div>
+
+        <div class="main-content">
+            <!-- Prediction Panel -->
+            <div class="card">
+                <h2>🔮 Generate Number Combinations</h2>
+                
+                <div class="control-group">
+                    <label for="strategy">Analysis Strategy:</label>
+                    <select id="strategy">
+                        <option value="random">Random Selection</option>
+                        <option value="frequency">Frequency-Based</option>
+                        <option value="hot_cold">Hot & Cold Mix</option>
+                        <option value="balanced">Balanced Distribution</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="num_picks">Number of Picks:</label>
+                    <input type="number" id="num_picks" min="1" max="10" value="4">
+                </div>
+
+                <button class="button" onclick="generateNumbers()">Generate Numbers</button>
+
+                <div id="predictions-result"></div>
+            </div>
+
+            <!-- Information Panel -->
+            <div class="card">
+                <h2>📊 How It Works</h2>
+                
+                <div class="info-section">
+                    <h3>Strategies Explained:</h3>
+                    <ul>
+                        <li><strong>Random Selection:</strong> Pure random number generation</li>
+                        <li><strong>Frequency-Based:</strong> Simulates historical frequency patterns</li>
+                        <li><strong>Hot & Cold Mix:</strong> Combines frequently and infrequently selected numbers</li>
+                        <li><strong>Balanced Distribution:</strong> Even spread across the number range</li>
+                    </ul>
+                </div>
+
+                <div class="info-section" style="margin-top: 15px;">
+                    <h3>About Keno:</h3>
+                    <ul>
+                        <li>Keno is a lottery-style game with 80 numbers</li>
+                        <li>20 numbers are drawn each round</li>
+                        <li>Players typically pick 1-10 numbers</li>
+                        <li>Payouts based on how many picks match drawn numbers</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Information -->
+        <div class="card">
+            <h2>🎯 Understanding Probability</h2>
+            
+            <div class="info-section">
+                <h3>Mathematical Reality:</h3>
+                <ul>
+                    <li>Each Keno draw is independent and random</li>
+                    <li>Past results do not influence future outcomes</li>
+                    <li>The house edge in Keno typically ranges from 20-40%</li>
+                    <li>No strategy can overcome the built-in house advantage</li>
+                    <li>This tool is for educational purposes to understand probability concepts</li>
+                </ul>
+            </div>
+
+            <div class="info-section" style="margin-top: 15px;">
+                <h3>Features of the Full System:</h3>
+                <ul>
+                    <li>Deep Q-Network (DQN) reinforcement learning implementation</li>
+                    <li>Multiple statistical analysis algorithms</li>
+                    <li>Pattern recognition using Markov chains</li>
+                    <li>Historical data analysis and visualization</li>
+                    <li>RESTful API for integration</li>
+                </ul>
+                <p style="margin-top: 10px;"><strong>Note:</strong> The full system requires Python backend and TensorFlow. This page demonstrates the frontend interface.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulated historical frequency (in a real system, this would come from actual data)
+        const simulatedFrequency = Array.from({length: 80}, (_, i) => ({
+            number: i + 1,
+            freq: Math.random() * 100
+        }));
+
+        function generateNumbers() {
+            const strategy = document.getElementById('strategy').value;
+            const numPicks = parseInt(document.getElementById('num_picks').value);
+            
+            let numbers;
+            let confidence;
+            
+            switch(strategy) {
+                case 'random':
+                    numbers = generateRandom(numPicks);
+                    confidence = 25;
+                    break;
+                case 'frequency':
+                    numbers = generateFrequencyBased(numPicks);
+                    confidence = 35;
+                    break;
+                case 'hot_cold':
+                    numbers = generateHotCold(numPicks);
+                    confidence = 30;
+                    break;
+                case 'balanced':
+                    numbers = generateBalanced(numPicks);
+                    confidence = 28;
+                    break;
+                default:
+                    numbers = generateRandom(numPicks);
+                    confidence = 25;
+            }
+            
+            displayPredictions({
+                numbers: numbers,
+                confidence: confidence,
+                strategy: strategy,
+                timestamp: new Date().toISOString()
+            });
+        }
+
+        function generateRandom(count) {
+            const numbers = new Set();
+            while(numbers.size < count) {
+                numbers.add(Math.floor(Math.random() * 80) + 1);
+            }
+            return Array.from(numbers).sort((a, b) => a - b);
+        }
+
+        function generateFrequencyBased(count) {
+            // Simulate frequency-based selection
+            const sorted = [...simulatedFrequency].sort((a, b) => b.freq - a.freq);
+            const topNumbers = sorted.slice(0, count * 3).map(x => x.number);
+            const selected = [];
+            while(selected.length < count && topNumbers.length > 0) {
+                const idx = Math.floor(Math.random() * Math.min(topNumbers.length, count * 2));
+                const num = topNumbers.splice(idx, 1)[0];
+                selected.push(num);
+            }
+            return selected.sort((a, b) => a - b);
+        }
+
+        function generateHotCold(count) {
+            const hotCount = Math.ceil(count / 2);
+            const coldCount = count - hotCount;
+            
+            const sorted = [...simulatedFrequency].sort((a, b) => b.freq - a.freq);
+            const hot = sorted.slice(0, 15).map(x => x.number);
+            const cold = sorted.slice(-15).map(x => x.number);
+            
+            const selected = [];
+            for(let i = 0; i < hotCount; i++) {
+                const idx = Math.floor(Math.random() * hot.length);
+                selected.push(hot.splice(idx, 1)[0]);
+            }
+            for(let i = 0; i < coldCount; i++) {
+                const idx = Math.floor(Math.random() * cold.length);
+                selected.push(cold.splice(idx, 1)[0]);
+            }
+            
+            return selected.sort((a, b) => a - b);
+        }
+
+        function generateBalanced(count) {
+            const ranges = Math.ceil(80 / count);
+            const numbers = [];
+            for(let i = 0; i < count; i++) {
+                const rangeStart = i * ranges + 1;
+                const rangeEnd = Math.min((i + 1) * ranges, 80);
+                const num = Math.floor(Math.random() * (rangeEnd - rangeStart + 1)) + rangeStart;
+                numbers.push(num);
+            }
+            return numbers.sort((a, b) => a - b);
+        }
+
+        function displayPredictions(data) {
+            const resultDiv = document.getElementById('predictions-result');
+            
+            let html = '<div class="predictions-display">';
+            html += '<h3>Generated Numbers:</h3>';
+            html += '<div class="number-grid">';
+            
+            data.numbers.forEach((num) => {
+                html += `<div class="number-ball">${num}</div>`;
+            });
+            
+            html += '</div>';
+            
+            html += `<div class="confidence-bar">
+                <div class="confidence-fill" style="width: ${data.confidence}%">
+                    ${data.confidence}% (Educational Estimate)
+                </div>
+            </div>`;
+            
+            html += `<div class="strategy-info">
+                <strong>Strategy Used:</strong> ${data.strategy}<br>
+                <strong>Timestamp:</strong> ${new Date(data.timestamp).toLocaleString()}<br>
+                <strong>Note:</strong> This is a client-side demonstration. The full system includes backend ML models.
+            </div>`;
+            
+            html += '</div>';
+            
+            resultDiv.innerHTML = html;
+        }
+
+        // Show welcome message
+        window.addEventListener('load', () => {
+            const resultDiv = document.getElementById('predictions-result');
+            resultDiv.innerHTML = `
+                <div class="strategy-info" style="margin-top: 20px;">
+                    <h4>Welcome!</h4>
+                    <p>This is a client-side demonstration of the Keno Analyzer interface.</p>
+                    <p>Click "Generate Numbers" to see the tool in action.</p>
+                    <p><strong>Remember:</strong> No system can predict random outcomes. Use this for learning only.</p>
+                </div>
+            `;
+        });
+    </script>
+</body>
+</html>
