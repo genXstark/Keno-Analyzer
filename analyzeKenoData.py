@@ -242,7 +242,7 @@ def predictNumbers(textFile):
             if not numList:
                 print("*********Populating New draw...")
                 numList = numbers
-            print numList
+            print(numList)
     return textFile
 
 #Get overall data
